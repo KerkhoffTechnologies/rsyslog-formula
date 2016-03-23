@@ -1,10 +1,12 @@
-# -*- coding: utf-8 -*-
-# vim: ft=yaml
+# vi: set ft=yaml: #
 rsyslog:
-  package: rsyslog
-  service: rsyslog
-  runuser: root
-  rungroup: root
-  config: /etc/rsyslog.conf
-  workdirectory: /var/spool/rsyslog
-  custom_config_path: /etc/rsyslog.d
+  lookup:
+    package: rsyslog
+    service: rsyslog
+    runuser: root
+    rungroup: root
+    config: /etc/rsyslog.conf
+    workdirectory: /var/spool/rsyslog
+    custom_config_path: /etc/rsyslog.d
+  custom: []
+  config: []

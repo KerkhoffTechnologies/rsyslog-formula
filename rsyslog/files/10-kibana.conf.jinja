@@ -1,0 +1,27 @@
+{# vi: set ft=jinja: #}
+
+module(load="omelasticsearch")
+template(name="systemTemplate"
+         type="list"
+         option.json="on") {
+           constant(value="{")
+             constant(value="\"timestamp\":\"")      property(name="timereported" dateFormat="rfc3339")
+             constant(value="\",\"message\":\"")     property(name="msg")
+             constant(value="\",\"host\":\"")        property(name="hostname")
+             constant(value="\",\"severity\":\"")    property(name="syslogseverity-text")
+             constant(value="\",\"facility\":\"")    property(name="syslogfacility-text")
+             constant(value="\",\"syslogtag\":\"")   property(name="syslogtag")
+           constant(value="\"}")
+         }
+
+*.* action(type="omelasticsearch"
+      template="systemTemplate"
+      searchIndex="system"
+      server="{{ config.elasticsearch.host|default('localhost') }}"
+      usehttps="{{ config.elasticsearch.usehttps|default('off') }}"
+      bulkmode="on"
+      queue.type="linkedlist"
+      queue.size="5000"
+      queue.dequeuebatchsize="30"
+      action.resumeretrycount="-1"
+)

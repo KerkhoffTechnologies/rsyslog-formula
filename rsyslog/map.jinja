@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
-# vim: ft=jinja
+{# vi: set ft=jinja: #}
+{# vi: set ft=jinja: #}
+{% import_yaml "rsyslog/defaults.yaml" as defaults %}
 
-{## Start with  defaults from defaults.yaml ##}
-{% import_yaml "rsyslog/defaults.yaml" as default_settings %}
-
-{##
-Setup variable using grains['os_family'] based logic, only add key:values here
-that differ from whats in defaults.yaml
-##}
 {% set os_family_map = salt['grains.filter_by']({
     'Debian': {},
     'RedHat': {
@@ -16,13 +10,9 @@ that differ from whats in defaults.yaml
     'Arch': {},
   }, grain='os_family', merge=salt['pillar.get']('rsyslog:lookup')) 
 %}
+{% do defaults.rsyslog.update(os_family_map) %}
 
-{## Merge the flavor_map to the default settings ##}
-{% do default_settings.rsyslog.update(os_family_map) %}
+{% set pkg = salt['pillar.get']('rsyslog:lookup', default={}, merge=True) %}
+{% do defaults.rsyslog.update(pkg) %}
 
-{## Merge in salt:lookup pillar ##}
-{% set rsyslog = salt['pillar.get'](
-    'rsyslog',
-    default=default_settings.rsyslog,
-    merge=True)
-%}
+{% set rsyslog = salt['pillar.get']('rsyslog', default=defaults['rsyslog'], merge=True) %}

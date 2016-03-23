@@ -1,35 +1,36 @@
+{# vi: set ft=jinja: #}
 {% from "rsyslog/map.jinja" import rsyslog with context %}
 
 rsyslog:
   pkg.installed:
-    - name: {{ rsyslog.package }}
+    - name: {{ rsyslog.lookup.package }}
   file.managed:
-    - name: {{ rsyslog.config }}
+    - name: {{ rsyslog.lookup.config }}
     - template: jinja
     - source: salt://rsyslog/templates/rsyslog.conf.jinja
     - context:
-      config: {{ salt['pillar.get']('rsyslog', {}) }}
+      config: {{ rsyslog.lookup|json }}
   service.running:
     - enable: True
-    - name: {{ rsyslog.service }}
+    - name: {{ rsyslog.lookup.service }}
     - require:
-      - pkg: {{ rsyslog.package }}
+      - pkg: {{ rsyslog.lookup.package }}
     - watch: 
-      - file: {{ rsyslog.config }}
+      - file: {{ rsyslog.lookup.config }}
 
 workdirectory:
   file.directory:
-    - name: {{ rsyslog.workdirectory }}
-    - user: {{ rsyslog.runuser }}
-    - group: {{ rsyslog.rungroup }}
+    - name: {{ rsyslog.lookup.workdirectory }}
+    - user: {{ rsyslog.lookup.runuser }}
+    - group: {{ rsyslog.lookup.rungroup }}
     - mode: 755
     - makedirs: True
 
-{% for filename in salt['pillar.get']('rsyslog:custom', ["50-default.conf"]) %}
+{% for filename in rsyslog.custom %}
 {% set basename = filename.split('/')|last %}
 rsyslog_custom_{{basename}}:
   file.managed:
-    - name: {{ rsyslog.custom_config_path }}/{{ basename|replace(".jinja", "") }}
+    - name: {{ rsyslog.lookup.custom_config_path }}/{{ basename|replace(".jinja", "") }}
     {% if basename != filename %}
     - source: {{ filename }}
     {% else %}
@@ -37,7 +38,8 @@ rsyslog_custom_{{basename}}:
     {% endif %}
     {% if filename.endswith('.jinja') %}
     - template: jinja
+      config: {{ rsyslog.config|json }}
     {% endif %}
     - watch_in:
-      - service: {{ rsyslog.service }}
+      - service: {{ rsyslog.lookup.service }}
 {% endfor %}
