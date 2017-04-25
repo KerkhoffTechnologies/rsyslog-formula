@@ -33,6 +33,10 @@ $InputTCPServerRun {{ config.listentcpprt|default('514') }}
 #### GLOBAL DIRECTIVES ####
 ###########################
 
+{% if config.preservefqdn|default(false) -%}
+$PreserveFQDN on
+{% endif %}
+
 {% if config.imjournal|default(false) -%}
 # Where to place auxiliary files
 $WorkDirectory {{ config.get('workdirectory', '/var/spool/rsyslog') }}

@@ -36,6 +36,8 @@ rsyslog_custom_{{basename}}:
     - source: salt://rsyslog/files/{{ filename }}
     {% endif %}
     {% if filename.endswith('.jinja') %}
+    - context:
+      config: {{ salt['pillar.get']('rsyslog', {}) }}
     - template: jinja
     {% endif %}
     - watch_in:
